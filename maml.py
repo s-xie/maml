@@ -3,6 +3,8 @@ from __future__ import print_function
 import numpy as np
 import sys
 import tensorflow as tf
+import optimizers
+
 try:
     import special_grads
 except KeyError as e:
@@ -23,6 +25,7 @@ class MAML:
         self.meta_lr = tf.placeholder_with_default(FLAGS.meta_lr, ())
         self.classification = False
         self.test_num_updates = test_num_updates
+        self.optimizer = FLAGS.optimizer
         if FLAGS.datasource == 'sinusoid':
             self.dim_hidden = [40, 40]
             self.loss_func = mse
@@ -139,10 +142,16 @@ class MAML:
             if self.classification:
                 self.total_accuracy1 = total_accuracy1 = tf.reduce_sum(accuraciesa) / tf.to_float(FLAGS.meta_batch_size)
                 self.total_accuracies2 = total_accuracies2 = [tf.reduce_sum(accuraciesb[j]) / tf.to_float(FLAGS.meta_batch_size) for j in range(num_updates)]
-            self.pretrain_op = tf.train.AdamOptimizer(self.meta_lr).minimize(total_loss1)
+            
+            if self.optimizer == "SGD":
+                optimizer = optimizers.SGD(self.meta_lr)
+            else:
+                optimizer = optimizers.SGD(self.meta_lr)
+
+            self.pretrain_op = optimizer.minimize(total_loss1)
 
             if FLAGS.metatrain_iterations > 0:
-                optimizer = tf.train.AdamOptimizer(self.meta_lr)
+                #optimizer = tf.train.AdamOptimizer(self.meta_lr)
                 self.gvs = gvs = optimizer.compute_gradients(self.total_losses2[FLAGS.num_updates-1])
                 if FLAGS.datasource == 'miniimagenet':
                     gvs = [(tf.clip_by_value(grad, -10, 10), var) for grad, var in gvs]

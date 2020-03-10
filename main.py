@@ -58,6 +58,7 @@ flags.DEFINE_integer('num_filters', 64, 'number of filters for conv nets -- 32 f
 flags.DEFINE_bool('conv', True, 'whether or not to use a convolutional network, only applicable in some cases')
 flags.DEFINE_bool('max_pool', False, 'Whether or not to use max pooling rather than strided convolutions')
 flags.DEFINE_bool('stop_grad', False, 'if True, do not use second derivatives in meta-optimization (for speed)')
+flags.DEFINE_string('optimizer', "SGD", 'Specify the optimzier to use (e.g. SGD, Adam, etc.)')
 
 ## Logging, saving, and testing options
 flags.DEFINE_bool('log', True, 'if false, do not log summaries, for debugging code.')
@@ -304,7 +305,7 @@ def main():
     if FLAGS.train_update_lr == -1:
         FLAGS.train_update_lr = FLAGS.update_lr
 
-    exp_string = 'cls_'+str(FLAGS.num_classes)+'.mbs_'+str(FLAGS.meta_batch_size) + '.ubs_' + str(FLAGS.train_update_batch_size) + '.numstep' + str(FLAGS.num_updates) + '.updatelr' + str(FLAGS.train_update_lr)
+    exp_string = 'cls_'+str(FLAGS.num_classes)+'.mbs_'+str(FLAGS.meta_batch_size) + '.ubs_' + str(FLAGS.train_update_batch_size) + '.numstep' + str(FLAGS.num_updates) + '.updatelr' + str(FLAGS.train_update_lr)+ '.optimizer_'+str(FLAGS.optimizer)+"_"
 
     if FLAGS.num_filters != 64:
         exp_string += 'hidden' + str(FLAGS.num_filters)
